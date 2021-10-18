@@ -44,16 +44,25 @@ class RazerHydra {
 		}
 		boolean open= hidDevice.open();
 		if(open) {
+			byte[] buf=new byte[90];
+			buf[5] = 1;
+			buf[7] = 4;
+			buf[8] = 3;
+			buf[88] = 6;
+			int res = hidDevice.sendFeatureReport(buf, (byte)0)
+			println "Result of IOCTL "+res
 			polling=true;
 			controllerPoller=new Thread({
 				while(polling) {
 					Thread.sleep(20)
-					
+					hidDevice.read(message, 20);
+					println message
 				}
 				println "Hydra disconnect"
 				if(hidDevice!=null)
 					hidDevice.close();
 				hidServices.shutdown();
+				hidServices=null;
 			})
 			controllerPoller.start()
 		}else {
