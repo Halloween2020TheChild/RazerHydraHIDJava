@@ -236,6 +236,12 @@ class RazerHydra {
 					BowlerStudio.printStackTrace(t)
 				}
 				println "Hydra disconnect"
+				// stop the device to stream positions
+				buf=new byte[90];
+				buf[5] = 1;
+				buf[7] = 4;
+				buf[88] = 5;
+				hidDevice.sendFeatureReport(buf, (byte)0)
 				if(hidDevice!=null)
 					hidDevice.close();
 				hidServices.shutdown();
