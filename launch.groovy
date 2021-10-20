@@ -57,7 +57,7 @@ class HydraController{
 			lastUpdate[i]=buf[i];
 		}
 		double posY = -getval16(8+(22*index))
-		double posX = -getval16(10+(22*index))+500
+		double posX = -getval16(10+(22*index))+800
 		double posZ = -getval16(12+(22*index))
 
 		double rotw=getval16(14+(22*index))/ 32768.0
@@ -236,7 +236,7 @@ class RazerHydra {
 					BowlerStudio.printStackTrace(t)
 				}
 				println "Hydra disconnect"
-				// stop the device to stream positions
+				// stop  the device to stream positions
 				buf=new byte[90];
 				buf[5] = 1;
 				buf[7] = 4;
