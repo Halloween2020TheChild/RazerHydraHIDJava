@@ -1,7 +1,10 @@
 import com.neuronrobotics.bowlerstudio.BowlerStudio
+import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory
 import com.neuronrobotics.sdk.addons.gamepad.IGameControlEvent
 import com.neuronrobotics.sdk.addons.gamepad.PersistantControllerMap
+import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics
+import com.neuronrobotics.sdk.addons.kinematics.MobileBase
 import com.neuronrobotics.sdk.addons.kinematics.math.ITransformNRChangeListener
 import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
@@ -58,7 +61,7 @@ class HydraController{
 		}
 		double posY = -getval16(8+(22*index))
 		double posX = -getval16(10+(22*index))+800
-		double posZ = -getval16(12+(22*index))
+		double posZ = -getval16(12+(22*index))+200
 
 		double rotw=getval16(14+(22*index))/ 32768.0
 		double rotx=getval16(16+(22*index))/ 32768.0
@@ -236,12 +239,12 @@ class RazerHydra {
 					BowlerStudio.printStackTrace(t)
 				}
 				println "Hydra disconnect"
-				// stop  the device to stream positions
-				buf=new byte[90];
-				buf[5] = 1;
-				buf[7] = 4;
-				buf[88] = 5;
-				hidDevice.sendFeatureReport(buf, (byte)0)
+//				// stop  the device to stream positions
+//				buf=new byte[90];
+//				buf[5] = 1;
+//				buf[7] = 4;
+//				buf[88] = 5;
+//				hidDevice.sendFeatureReport(buf, (byte)0)
 				if(hidDevice!=null)
 					hidDevice.close();
 				hidServices.shutdown();
@@ -311,8 +314,7 @@ class RazerHydra {
 		}
 	}
 }
-
-RazerHydra hydra=DeviceManager.getSpecificDevice( "RazerHydra",{
+def hydra=DeviceManager.getSpecificDevice( "RazerHydra",{
 	def hydra =new RazerHydra();
 	hydra.connect();
 	return hydra
@@ -327,7 +329,28 @@ hydra.addListeners(new IGameControlEvent(){
 			println n+" "+value
 	}
 })
-
+MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
+			//If the device does not exist, prompt for the connection
+			
+			MobileBase m = MobileBaseLoader.fromGit(
+				"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git",
+				"hephaestus.xml"
+				)
+			if(m==null)
+				throw new RuntimeException("Arm failed to assemble itself")
+			println "Connecting new device robot arm "+m
+			return m
+		})
+println base
+hydra.clearChangeListenerLeft()
+hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
+	public  void event(TransformNR changed) {
+		DHParameterKinematics arm = base.getAllDHChains().get(0)
+		if(arm.checkTaskSpaceTransform(arm, changed)) {
+			arm.setDesiredTaskSpaceTransform(changed, 0)
+		}
+	}
+})
 return [left, right];
 
 
