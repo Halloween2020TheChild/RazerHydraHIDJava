@@ -3,6 +3,7 @@ import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader
 import com.neuronrobotics.bowlerstudio.physics.TransformFactory
 import com.neuronrobotics.sdk.addons.gamepad.IGameControlEvent
 import com.neuronrobotics.sdk.addons.gamepad.PersistantControllerMap
+import com.neuronrobotics.sdk.addons.kinematics.AbstractLink
 import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase
 import com.neuronrobotics.sdk.addons.kinematics.math.ITransformNRChangeListener
@@ -61,7 +62,7 @@ class HydraController{
 		}
 		double posY = -getval16(8+(22*index))
 		double posX = -getval16(10+(22*index))+500
-		double posZ = -getval16(12+(22*index))+200
+		double posZ = -getval16(12+(22*index))
 
 		double rotw=getval16(14+(22*index))/ 32768.0
 		double rotx=getval16(16+(22*index))/ 32768.0
@@ -346,9 +347,28 @@ hydra.clearChangeListenerLeft()
 hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
 	public  void event(TransformNR changed) {
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		if(arm.checkTaskSpaceTransform(arm, changed)) {
-			arm.setDesiredTaskSpaceTransform(changed, 0)
+		try {
+			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
+			
+			for (int i = 0; i < jointSpaceVect.length; i++) {
+				AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
+				double val = link.toLinkUnits(jointSpaceVect[i]);
+				Double double1 = new Double(val);
+				if(double1.isNaN() ||double1.isInfinite() ) {
+					jointSpaceVect[i]=0;
+				}
+				if (val > link.getUpperLimit()) {
+					jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit());
+				}
+				if (val < link.getLowerLimit()) {
+					jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit());
+				}
+			}
+			arm.setDesiredJointSpaceVector(jointSpaceVect, 0);
+		}catch(Throwable t) {
+			//t.printStackTrace()
 		}
+		
 	}
 })
 return [left, right];
