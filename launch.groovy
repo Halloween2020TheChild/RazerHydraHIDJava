@@ -60,7 +60,7 @@ class HydraController{
 			lastUpdate[i]=buf[i];
 		}
 		double posY = -getval16(8+(22*index))
-		double posX = -getval16(10+(22*index))+800
+		double posX = -getval16(10+(22*index))+500
 		double posZ = -getval16(12+(22*index))+200
 
 		double rotw=getval16(14+(22*index))/ 32768.0
