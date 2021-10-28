@@ -25,15 +25,15 @@ import org.hid4java.HidManager;
 import org.hid4java.HidServices;
 
 class HydraController{
-	private int index=0;
-	private byte [] buf=null;
-	private byte [] lastUpdate=new byte[64];
+	public int index=0;
+	public byte [] buf=null;
+	public byte [] lastUpdate=new byte[64];
 	TransformNR pose = new TransformNR()
 	Affine manipulator = new Affine()
 	
-	private double andalogx=0;
-	private double andalogy=0;
-	private double andalogtrig=0;
+	public double andalogx=0;
+	public double andalogy=0;
+	public double andalogtrig=0;
 	int trigButton=0;
 	int buttonHat=0;
 	int buttonselect=0;
@@ -82,7 +82,10 @@ class HydraController{
 		
 		andalogy=getval16(23+(22*index))/ 32768.0
 		andalogx=getval16(25+(22*index))/ 32768.0
-		andalogtrig=buf[27+(22*index)]/255.0
+		def andalogtrigtmp=buf[27+(22*index)]
+		if(andalogtrigtmp<0)
+			andalogtrigtmp+=256
+		andalogtrig	=andalogtrigtmp/255.0
 		
 		trigButton=(buttonmask & 0x01) ? 1 : 0;
 		buttonHat=(buttonmask & 0x40) ? 1 : 0;
@@ -121,8 +124,8 @@ class RazerHydra {
 	private HidDevice hidDevice = null;
 	private HidServices hidServices = null;
 	private byte[] message=new byte[64];
-	HydraController left= new HydraController(0,message)
-	HydraController right= new HydraController(1,message)
+	public HydraController left= new HydraController(0,message)
+	public HydraController right= new HydraController(1,message)
 	boolean polling =false;
 	Thread controllerPoller=null;
 	public String getName() {
@@ -345,8 +348,15 @@ MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 println base
 hydra.clearChangeListenerLeft()
 hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
-	public  void event(TransformNR changed) {
+
+	public  void event(TransformNR c) {
+		TransformNR changed=c.copy()
+		if(changed.getX()<70){
+			changed.setX(70)
+		}
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
+		def trig=(hydra.right.andalogtrig*220)-110
+		println "Trig Value="+ trig
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
 			
@@ -363,6 +373,12 @@ hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
 				if (val < link.getLowerLimit()) {
 					jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit());
 				}
+			}
+			
+			try {
+				jointSpaceVect[6]=trig;
+			}catch(Throwable t) {
+				BowlerStudio.printStackTrace(t)
 			}
 			arm.setDesiredJointSpaceVector(jointSpaceVect, 0);
 		}catch(Throwable t) {
