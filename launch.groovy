@@ -355,12 +355,16 @@ hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
 			changed.setX(70)
 		}
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		def trig=(hydra.right.andalogtrig*220)-110
-		println "Trig Value="+ trig
+		def trig=(hydra.right.andalogtrig*50)
+		//println "Trig Value="+ trig
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
-			
-			for (int i = 0; i < jointSpaceVect.length; i++) {
+			try {
+				jointSpaceVect[6]=trig;
+			}catch(Throwable t) {
+				BowlerStudio.printStackTrace(t)
+			}
+			for (int i = 0; i < 6; i++) {
 				AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
 				double val = link.toLinkUnits(jointSpaceVect[i]);
 				Double double1 = new Double(val);
@@ -375,14 +379,10 @@ hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
 				}
 			}
 			
-			try {
-				jointSpaceVect[6]=trig;
-			}catch(Throwable t) {
-				BowlerStudio.printStackTrace(t)
-			}
+			
 			arm.setDesiredJointSpaceVector(jointSpaceVect, 0);
 		}catch(Throwable t) {
-			//t.printStackTrace()
+			arm.setDesiredJointAxisValue(6, trig, 0)
 		}
 		
 	}
