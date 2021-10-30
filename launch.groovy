@@ -351,14 +351,21 @@ hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
 
 	public  void event(TransformNR c) {
 		TransformNR changed=c.copy()
-		if(changed.getX()<170){
-			changed.setX(170)
-		}
-		if(changed.getZ()<150){
-			changed.setZ(150)
-		}
-		def analogside = hydra.right.andalogy*10
-		def analogup = hydra.right.andalogx*10 - 10
+		//if(changed.getX()<170){
+			changed.setX(180)
+		//}
+		
+		//if(changed.getZ()<150){
+			
+		//}
+		
+		def headRnage=20
+		def analogy = hydra.left.andalogy*120
+		def analogz = hydra.left.andalogx*100+100
+		changed.setZ(150+analogz)
+		changed.setY(analogy)
+		def analogside = -hydra.right.andalogx*headRnage
+		def analogup = -hydra.right.andalogy*headRnage *1.5
 		changed.setRotation(new RotationNR(0,179.96+analogup,-47.79+analogside))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
 		def trig=(hydra.right.andalogtrig*50)
