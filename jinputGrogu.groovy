@@ -1,8 +1,13 @@
+import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader
 import com.neuronrobotics.sdk.addons.gamepad.BowlerJInputDevice
 import com.neuronrobotics.sdk.addons.gamepad.IGameControlEvent
+import com.neuronrobotics.sdk.addons.kinematics.AbstractLink
+import com.neuronrobotics.sdk.addons.kinematics.DHParameterKinematics
 import com.neuronrobotics.sdk.addons.kinematics.MobileBase
+import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR
+import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 import com.neuronrobotics.sdk.util.ThreadUtil
 
@@ -28,17 +33,19 @@ BowlerJInputDevice g=DeviceManager.getSpecificDevice("gamepad",{
 	return t
 })
 
-def x =0;
+float x =0;
 
-def straif=0;
-def rz=0;
-def ljud =0;
+float straif=0;
+float rz=0;
+float ljud =0;
+float trigButton=0;
+float trigAnalog=0;
 
 IGameControlEvent listener = new IGameControlEvent() {
 	@Override public void onEvent(String name,float value) {
 		
 		if(name.contentEquals("l-joy-left-right")){
-			straif=-value;
+			straif=value;
 		}
 		else if(name.contentEquals("r-joy-up-down")){
 			x=-value;
@@ -48,6 +55,10 @@ IGameControlEvent listener = new IGameControlEvent() {
 		}
 		else if(name.contentEquals("r-joy-left-right")){
 			rz=value;
+		}else if(name.contentEquals("analog-trig")){
+			trigAnalog=value/2.0+0.5;
+		}else if(name.contentEquals("z")){
+			trigButton=value/2.0+0.5;
 		}
 		else if(name.contentEquals("x-mode")){
 			if(value>0) {
@@ -71,6 +82,47 @@ g.addListeners(listener);
 try{
 	while(!Thread.interrupted() ){
 		ThreadUtil.wait(30)
+		TransformNR changed=new TransformNR()
+		changed.setX(180)
+
+		
+		def headRnage=20
+		def analogy = -straif*100
+		def analogz = ljud*80+100
+		changed.setZ(100+analogz)
+		changed.setY(analogy)
+		def analogside = -x*headRnage
+		def analogup = -rz*headRnage *1.5
+		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-57.79+analogside))
+		DHParameterKinematics arm = base.getAllDHChains().get(0)
+		def trig=(trigAnalog*50)
+		try {
+			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
+			try {
+				jointSpaceVect[6]=trig;
+			}catch(Throwable t) {
+				BowlerStudio.printStackTrace(t)
+			}
+			for (int i = 0; i < 6; i++) {
+				AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
+				double val = link.toLinkUnits(jointSpaceVect[i]);
+				Double double1 = new Double(val);
+				if(double1.isNaN() ||double1.isInfinite() ) {
+					jointSpaceVect[i]=0;
+				}
+				if (val > link.getUpperLimit()) {
+					jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit());
+				}
+				if (val < link.getLowerLimit()) {
+					jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit());
+				}
+			}
+			
+			
+			arm.setDesiredJointSpaceVector(jointSpaceVect, 0);
+		}catch(Throwable t) {
+			arm.setDesiredJointAxisValue(6, trig, 0)
+		}
 	}
 }catch(Throwable t){
 	t.printStackTrace()
