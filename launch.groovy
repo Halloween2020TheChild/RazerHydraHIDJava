@@ -360,15 +360,15 @@ hydra.addChangeListenerLeft(new ITransformNRChangeListener() {
 		//}
 		
 		def headRnage=20
-		def analogy = hydra.left.andalogy*120
-		def analogz = hydra.left.andalogx*100+100
-		changed.setZ(150+analogz)
+		def analogy = -hydra.left.andalogy*100
+		def analogz = hydra.left.andalogx*80+100
+		changed.setZ(100+analogz)
 		changed.setY(analogy)
 		def analogside = -hydra.right.andalogx*headRnage
 		def analogup = -hydra.right.andalogy*headRnage *1.5
-		changed.setRotation(new RotationNR(0,179.96+analogup,-47.79+analogside))
+		changed.setRotation(new RotationNR(-30*hydra.right.trigButton,179.96+analogup,-57.79+analogside))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		def trig=(hydra.right.andalogtrig*50)
+		def trig=(hydra.left.andalogtrig*50)
 		//println "Trig Value="+ trig
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
