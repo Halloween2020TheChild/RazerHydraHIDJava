@@ -101,7 +101,7 @@ try{
 			try {
 				jointSpaceVect[6]=trig;
 			}catch(Throwable t) {
-				BowlerStudio.printStackTrace(t)
+				//BowlerStudio.printStackTrace(t)
 			}
 			for (int i = 0; i < 6; i++) {
 				AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
