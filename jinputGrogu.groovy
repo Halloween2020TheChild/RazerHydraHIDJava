@@ -24,7 +24,7 @@ MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 			return m
 		})
 println base
-List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game"])
+List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
 
 //Check if the device already exists in the device Manager
 BowlerJInputDevice g=DeviceManager.getSpecificDevice("gamepad",{
@@ -83,17 +83,17 @@ try{
 	while(!Thread.interrupted() ){
 		ThreadUtil.wait(30)
 		TransformNR changed=new TransformNR()
-		changed.setX(180)
+		changed.setX(190)
 
 		
 		def headRnage=20
 		def analogy = -straif*100
-		def analogz = ljud*80+100
+		def analogz = -ljud*80+100
 		changed.setZ(100+analogz)
 		changed.setY(analogy)
 		def analogside = -x*headRnage
 		def analogup = -rz*headRnage *1.5
-		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-57.79+analogside))
+		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-67.79+analogside))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
 		def trig=(trigAnalog*50)
 		try {
