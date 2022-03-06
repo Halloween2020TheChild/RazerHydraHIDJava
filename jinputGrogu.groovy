@@ -87,13 +87,13 @@ try{
 
 		
 		def headRnage=20
-		def analogy = -straif*100
-		def analogz = -ljud*80+100
+		def analogy = -straif*80
+		def analogz = -ljud*65+90
 		changed.setZ(100+analogz)
 		changed.setY(analogy)
 		def analogside = -x*headRnage
 		def analogup = -rz*headRnage *1.5
-		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-67.79+analogside))
+		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-57.79+analogside))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
 		def trig=(trigAnalog*50)
 		try {
