@@ -24,6 +24,7 @@ MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 			return m
 		})
 println base
+ConfigurationDatabase.setObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
 List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
 
 //Check if the device already exists in the device Manager
