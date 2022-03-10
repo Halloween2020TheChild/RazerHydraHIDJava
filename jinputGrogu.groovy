@@ -72,6 +72,12 @@ IGameControlEvent listener = new IGameControlEvent() {
 			}else
 				tilt=0;
 		}
+		else if(name.contentEquals("l-trig-button")){
+			if(value>0) {
+				tilt=-1;	
+			}else
+				tilt=0;
+		}
 		else if(name.contentEquals("y-mode")){
 			if(value>0) {
 				
