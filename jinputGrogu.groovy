@@ -41,6 +41,7 @@ float rz=0;
 float ljud =0;
 float trigButton=0;
 float trigAnalog=0;
+float tilt=0;
 
 IGameControlEvent listener = new IGameControlEvent() {
 	@Override public void onEvent(String name,float value) {
@@ -65,6 +66,11 @@ IGameControlEvent listener = new IGameControlEvent() {
 			if(value>0) {
 				
 			}
+		}else if(name.contentEquals("r-trig-button")){
+			if(value>0) {
+				tilt=1;	
+			}else
+				tilt=0;
 		}
 		else if(name.contentEquals("y-mode")){
 			if(value>0) {
@@ -94,7 +100,10 @@ try{
 		changed.setY(analogy)
 		def analogside = -x*headRnage
 		def analogup = -rz*headRnage *1.5
-		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-57.79+analogside))
+		
+		changed.setRotation(new RotationNR(0,179.96+analogup,-57.79+analogside))
+		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(tilt*-30))
+		changed=changed.times(tilted)
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
 		def trig=(trigAnalog*50)
 		try {
@@ -113,9 +122,11 @@ try{
 				}
 				if (val > link.getUpperLimit()) {
 					jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit());
+					println "Link "+i+" u-limit "+jointSpaceVect[i]
 				}
 				if (val < link.getLowerLimit()) {
 					jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit());
+					println "Link "+i+" l-limit "+jointSpaceVect[i]
 				}
 			}
 			
