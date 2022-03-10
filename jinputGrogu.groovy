@@ -24,7 +24,8 @@ MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 			return m
 		})
 println base
-List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game"])
+ConfigurationDatabase.setObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
+List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
 
 //Check if the device already exists in the device Manager
 BowlerJInputDevice g=DeviceManager.getSpecificDevice("gamepad",{
@@ -40,6 +41,7 @@ float rz=0;
 float ljud =0;
 float trigButton=0;
 float trigAnalog=0;
+float tilt=0;
 
 IGameControlEvent listener = new IGameControlEvent() {
 	@Override public void onEvent(String name,float value) {
@@ -64,6 +66,17 @@ IGameControlEvent listener = new IGameControlEvent() {
 			if(value>0) {
 				
 			}
+		}else if(name.contentEquals("r-trig-button")){
+			if(value>0) {
+				tilt=1;	
+			}else
+				tilt=0;
+		}
+		else if(name.contentEquals("l-trig-button")){
+			if(value>0) {
+				tilt=-1;	
+			}else
+				tilt=0;
 		}
 		else if(name.contentEquals("y-mode")){
 			if(value>0) {
@@ -83,17 +96,20 @@ try{
 	while(!Thread.interrupted() ){
 		ThreadUtil.wait(30)
 		TransformNR changed=new TransformNR()
-		changed.setX(180)
+		changed.setX(190)
 
 		
 		def headRnage=20
-		def analogy = -straif*100
-		def analogz = ljud*80+100
+		def analogy = -straif*80
+		def analogz = -ljud*65+90
 		changed.setZ(100+analogz)
 		changed.setY(analogy)
 		def analogside = -x*headRnage
 		def analogup = -rz*headRnage *1.5
-		changed.setRotation(new RotationNR(-30*trigButton,179.96+analogup,-57.79+analogside))
+		
+		changed.setRotation(new RotationNR(0,179.96+analogup,-57.79+analogside))
+		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(tilt*-30))
+		changed=changed.times(tilted)
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
 		def trig=(trigAnalog*50)
 		try {
@@ -112,9 +128,11 @@ try{
 				}
 				if (val > link.getUpperLimit()) {
 					jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit());
+					println "Link "+i+" u-limit "+jointSpaceVect[i]
 				}
 				if (val < link.getLowerLimit()) {
 					jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit());
+					println "Link "+i+" l-limit "+jointSpaceVect[i]
 				}
 			}
 			
