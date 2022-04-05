@@ -108,7 +108,7 @@ try{
 		def analogup = -rz*headRnage *1.5
 		
 		changed.setRotation(new RotationNR(0,179.96+analogup,-57.79+analogside))
-		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(tilt*-30))
+		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90+tilt*-30))
 		changed=changed.times(tilted)
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
 		def trig=(trigAnalog*50)
