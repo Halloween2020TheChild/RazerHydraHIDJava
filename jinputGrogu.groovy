@@ -91,10 +91,11 @@ IGameControlEvent listener = new IGameControlEvent() {
 g.clearListeners()
 
 g.addListeners(listener);
-
+long msAttempted = 30
+long msActual=msAttempted
 try{
 	while(!Thread.interrupted() ){
-		ThreadUtil.wait(30)
+		Thread.sleep(msActual)
 		TransformNR changed=new TransformNR()
 		changed.setX(190)
 
@@ -143,7 +144,7 @@ try{
 		}
 	}
 }catch(Throwable t){
-	t.printStackTrace()
+	t.printStackTrace(System.out)
 }
 //remove listener and exit
 g.removeListeners(listener);
