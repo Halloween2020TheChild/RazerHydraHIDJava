@@ -140,6 +140,7 @@ try{
 			double normalsecs = ((double)msAttempted)/1000.0
 			if(bestsecs>normalsecs) {
 				normalsecs=bestsecs;
+				println "Speed capped "+normalsecs
 			}
 			msActual=normalsecs*1000
 			arm.setDesiredJointSpaceVector(jointSpaceVect, normalsecs);
