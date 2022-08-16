@@ -97,18 +97,17 @@ try{
 	while(!Thread.interrupted() ){
 
 		TransformNR changed=new TransformNR()
-		changed.setX(190)
+		changed.setX(170+(x*30))
 
 		
 		def headRnage=20
 		def analogy = -straif*80
-		def analogz = -ljud*65+90
-		changed.setZ(100+analogz)
+		def analogz = -ljud*65
+		changed.setZ(190+analogz)
 		changed.setY(analogy)
-		def analogside = -x*headRnage
 		def analogup = -rz*headRnage *1.5
 		
-		changed.setRotation(new RotationNR(0,179.96+analogup,-57.79+analogside))
+		changed.setRotation(new RotationNR(0,179.96+analogup,-57.79))
 		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90+tilt*-30))
 		changed=changed.times(tilted)
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
@@ -141,7 +140,6 @@ try{
 			double normalsecs = ((double)msAttempted)/1000.0
 			if(bestsecs>normalsecs) {
 				normalsecs=bestsecs;
-				println "Speed capped "+(normalsecs)
 			}
 			msActual=normalsecs*1000
 			arm.setDesiredJointSpaceVector(jointSpaceVect, normalsecs);
