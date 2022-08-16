@@ -95,7 +95,7 @@ long msAttempted = 30
 long msActual=msAttempted
 try{
 	while(!Thread.interrupted() ){
-		Thread.sleep(msActual)
+
 		TransformNR changed=new TransformNR()
 		changed.setX(190)
 
@@ -137,11 +137,18 @@ try{
 				}
 			}
 			
-			
-			arm.setDesiredJointSpaceVector(jointSpaceVect, 0);
+			double bestsecs = arm.getBestTime(jointSpaceVect);
+			double normalsecs = ((double)msAttempted)/1000.0
+			if(bestsecs>normalsecs) {
+				normalsecs=bestsecs;
+				println "Speed capped "+(normalsecs)
+			}
+			msActual=normalsecs*1000
+			arm.setDesiredJointSpaceVector(jointSpaceVect, normalsecs);
 		}catch(Throwable t) {
 			arm.setDesiredJointAxisValue(6, trig, 0)
 		}
+		Thread.sleep(msActual)
 	}
 }catch(Throwable t){
 	t.printStackTrace(System.out)
