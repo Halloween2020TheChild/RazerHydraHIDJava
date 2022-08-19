@@ -98,17 +98,17 @@ long msActual=msAttempted
 def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
 	for (int i = 0; i < 6; i++) {
 		AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
-		double val = link.toLinkUnits(jointSpaceVect[i]);
+		double val = jointSpaceVect[i];
 		Double double1 = new Double(val);
 		if(double1.isNaN() ||double1.isInfinite() ) {
 			jointSpaceVect[i]=0;
 		}
-		if (val > link.getUpperLimit()) {
-			jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit())-Double.MIN_VALUE;
+		if (val > link.getMaxEngineeringUnits()) {
+			jointSpaceVect[i]=link.getMaxEngineeringUnits()-Double.MIN_VALUE;
 			//println "Link "+i+" u-limit "+jointSpaceVect[i]
 		}
-		if (val < link.getLowerLimit()) {
-			jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit())+Double.MIN_VALUE;
+		if (val < link.getMinEngineeringUnits()) {
+			jointSpaceVect[i]=link.getMinEngineeringUnits()+Double.MIN_VALUE;
 			//println "Link "+i+" l-limit "+jointSpaceVect[i]
 		}
 	}
@@ -134,11 +134,7 @@ try{
 		def trig=(trigAnalog*50)
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
-			try {
-				jointSpaceVect[6]=trig;
-			}catch(Throwable t) {
-				//BowlerStudio.printStackTrace(t)
-			}
+
 			fixVector(jointSpaceVect,arm)
 			
 			double bestsecs = arm.getBestTime(jointSpaceVect);
@@ -147,7 +143,7 @@ try{
 			if(bestsecs>normalsecs) {
 				double percentpossible = normalsecs/bestsecs
 
-				TransformNR starttr=arm.getCurrentTaskSpaceTransform()
+				TransformNR starttr=arm.getCurrentPoseTarget()
 				TransformNR delta = starttr.inverse().times(changed);
 				TransformNR scaled = delta.scale(percentpossible)
 				TransformNR newTR= starttr.times(scaled)
@@ -155,20 +151,25 @@ try{
 				fixVector(vect,arm)
 
 				if(!arm.checkTaskSpaceTransform(newTR)) {
-//					println "\n\npercentage "+percentpossible
-//					println "Speed capped\t"+jointSpaceVect
-//					println "to\t\t\t"+vect
-//					println "changed"+changed
-//					println "starttr"+starttr
-//					println "delta"+delta
-//					println "scaled"+scaled
-//					println "newTR"+newTR
-//					println "ERROR, cant get to "+newTR
+					println "\n\npercentage "+percentpossible
+					println "Speed capped\t"+jointSpaceVect
+					println "to\t\t\t"+vect
+					println "changed"+changed
+					println "starttr"+starttr
+					println "delta"+delta
+					println "scaled"+scaled
+					println "newTR"+newTR
+					println "ERROR, cant get to "+newTR
 					
 				}
 			}else
 				vect = jointSpaceVect
 			msActual=normalsecs*1000
+			try {
+				vect[6]=trig;
+			}catch(Throwable t) {
+				//BowlerStudio.printStackTrace(t)
+			}
 			arm.setDesiredJointSpaceVector(vect, normalsecs);
 		}catch(Throwable t) {
 			arm.setDesiredJointAxisValue(6, trig, 0)
