@@ -166,14 +166,20 @@ try{
 				vect = jointSpaceVect
 			msActual=normalsecs*1000
 			try {
-				vect[6]=trig;
+				//vect[6]=trig;
 			}catch(Throwable t) {
 				//BowlerStudio.printStackTrace(t)
 			}
 			arm.setDesiredJointSpaceVector(vect, normalsecs);
 		}catch(Throwable t) {
-			arm.setDesiredJointAxisValue(6, trig, 0)
+			t.printStackTrace(System.out)
+			//arm.setDesiredJointAxisValue(6, trig, 0)
 		}
+		MobileBase head = arm.getDhLink(5).getSlaveMobileBase()
+		//println head
+		DHParameterKinematics mouth=head.getAllDHChains().get(0)
+		//println mouth
+		mouth.setDesiredJointAxisValue(0, trig, 0)
 		Thread.sleep(msActual)
 	}
 }catch(Throwable t){
