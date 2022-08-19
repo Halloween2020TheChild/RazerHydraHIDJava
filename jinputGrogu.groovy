@@ -1,6 +1,7 @@
 
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader
+import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
 import com.neuronrobotics.sdk.addons.gamepad.BowlerJInputDevice
 import com.neuronrobotics.sdk.addons.gamepad.IGameControlEvent
 import com.neuronrobotics.sdk.addons.kinematics.AbstractLink
@@ -10,7 +11,7 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 import com.neuronrobotics.sdk.util.ThreadUtil
-
+ScriptingEngine.pull("https://github.com/Halloween2020TheChild/GroguMechanicsCad.git")
 MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 			//If the device does not exist, prompt for the connection
 			
