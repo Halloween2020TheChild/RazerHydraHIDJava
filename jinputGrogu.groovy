@@ -83,16 +83,35 @@ IGameControlEvent listener = new IGameControlEvent() {
 				
 			}
 		}
-			System.out.println(name+" is value= "+value);
+			//System.out.println(name+" is value= "+value);
 		
 	}
 }
 
 g.clearListeners()
-
+Log.enableSystemPrint(true)
 g.addListeners(listener);
 long msAttempted = 30
 long msActual=msAttempted
+
+def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
+	for (int i = 0; i < 6; i++) {
+		AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
+		double val = link.toLinkUnits(jointSpaceVect[i]);
+		Double double1 = new Double(val);
+		if(double1.isNaN() ||double1.isInfinite() ) {
+			jointSpaceVect[i]=0;
+		}
+		if (val > link.getUpperLimit()) {
+			jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit())-Double.MIN_VALUE;
+			//println "Link "+i+" u-limit "+jointSpaceVect[i]
+		}
+		if (val < link.getLowerLimit()) {
+			jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit())+Double.MIN_VALUE;
+			//println "Link "+i+" l-limit "+jointSpaceVect[i]
+		}
+	}
+}
 try{
 	while(!Thread.interrupted() ){
 
@@ -100,10 +119,10 @@ try{
 		changed.setX(170+(x*30))
 
 		
-		def headRnage=20
-		def analogy = -straif*80
-		def analogz = -ljud*65
-		changed.setZ(190+analogz)
+		def headRnage=15
+		def analogy = -straif*70
+		def analogz = -ljud*35
+		changed.setZ(200+analogz)
 		changed.setY(analogy)
 		def analogup = -rz*headRnage *1.5
 		
@@ -119,31 +138,37 @@ try{
 			}catch(Throwable t) {
 				//BowlerStudio.printStackTrace(t)
 			}
-			for (int i = 0; i < 6; i++) {
-				AbstractLink link = arm.factory.getLink(arm.getLinkConfiguration(i));
-				double val = link.toLinkUnits(jointSpaceVect[i]);
-				Double double1 = new Double(val);
-				if(double1.isNaN() ||double1.isInfinite() ) {
-					jointSpaceVect[i]=0;
-				}
-				if (val > link.getUpperLimit()) {
-					jointSpaceVect[i]=link.toEngineeringUnits(link.getUpperLimit());
-					println "Link "+i+" u-limit "+jointSpaceVect[i]
-				}
-				if (val < link.getLowerLimit()) {
-					jointSpaceVect[i]=link.toEngineeringUnits(link.getLowerLimit());
-					println "Link "+i+" l-limit "+jointSpaceVect[i]
-				}
-			}
+			fixVector(jointSpaceVect,arm)
 			
 			double bestsecs = arm.getBestTime(jointSpaceVect);
 			double normalsecs = ((double)msAttempted)/1000.0
+			def vect;
 			if(bestsecs>normalsecs) {
-				normalsecs=bestsecs;
-				println "Speed capped "+normalsecs
-			}
+				double percentpossible = normalsecs/bestsecs
+
+				TransformNR starttr=arm.getCurrentTaskSpaceTransform()
+				TransformNR delta = starttr.inverse().times(changed);
+				TransformNR scaled = delta.scale(percentpossible)
+				TransformNR newTR= starttr.times(scaled)
+				vect = arm.inverseKinematics(arm.inverseOffset(newTR));
+				fixVector(vect,arm)
+
+				if(!arm.checkTaskSpaceTransform(newTR)) {
+//					println "\n\npercentage "+percentpossible
+//					println "Speed capped\t"+jointSpaceVect
+//					println "to\t\t\t"+vect
+//					println "changed"+changed
+//					println "starttr"+starttr
+//					println "delta"+delta
+//					println "scaled"+scaled
+//					println "newTR"+newTR
+//					println "ERROR, cant get to "+newTR
+					
+				}
+			}else
+				vect = jointSpaceVect
 			msActual=normalsecs*1000
-			arm.setDesiredJointSpaceVector(jointSpaceVect, normalsecs);
+			arm.setDesiredJointSpaceVector(vect, normalsecs);
 		}catch(Throwable t) {
 			arm.setDesiredJointAxisValue(6, trig, 0)
 		}
