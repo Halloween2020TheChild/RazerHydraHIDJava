@@ -129,6 +129,7 @@ def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
 	}
 }
 Thread meowThread = null
+
 def meow() {
 	
 	
@@ -136,7 +137,7 @@ def meow() {
 				.fileFromGit(
 				"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
 				"master",//branch
-				"cat-meow5.wav"// File from within the Git repo
+				"meow.wav"// File from within the Git repo
 				)
 		try
 		{
@@ -157,10 +158,12 @@ def meow() {
 					System.out.println("Current "+pos +" Percent = "+percent);
 					ThreadUtil.wait(100);
 				}
+				println "Done!"
 			}catch(Throwable t){
 				//BowlerStudio.printStackTrace(t)
 				t.printStackTrace(System.out)
 			}
+			println "stopping..."
 			audioClip.stop()
 		}
 		catch (Exception e)
@@ -169,8 +172,11 @@ def meow() {
 			//BowlerStudio.printStackTrace(e)
 			return null;
 		}
+		println "Returning"
 	
 }
+//meow()
+println "Starting code"
 try{
 	def lasttrig=0;
 	while(!Thread.interrupted() ){
@@ -242,10 +248,11 @@ try{
 			if(meowThread==null||!meowThread.isAlive()) {
 				meowThread=new Thread() {
 					public void run() {
-						meow()
 						println "MEOW"
+						meow()
 						interrupt()
 						meowThread=null;
+						println "Meow Thread Exit"
 					}
 				}
 				meowThread.start()
@@ -253,6 +260,7 @@ try{
 				
 			
 		}
+		//println trig
 		lasttrig=trig;
 		mouth.setDesiredJointAxisValue(0, trig, 0)
 		Thread.sleep(msActual)
