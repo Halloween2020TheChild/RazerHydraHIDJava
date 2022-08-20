@@ -11,22 +11,37 @@ import com.neuronrobotics.sdk.addons.kinematics.math.RotationNR
 import com.neuronrobotics.sdk.addons.kinematics.math.TransformNR
 import com.neuronrobotics.sdk.common.DeviceManager
 import com.neuronrobotics.sdk.util.ThreadUtil
+import javax.sound.sampled.AudioInputStream
+import javax.sound.sampled.AudioSystem
+import javax.sound.sampled.Clip
+import javax.sound.sampled.FloatControl
+
 ScriptingEngine.pull("https://github.com/Halloween2020TheChild/GroguMechanicsCad.git")
 MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
-			//If the device does not exist, prompt for the connection
-			
-			MobileBase m = MobileBaseLoader.fromGit(
-				"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git",
-				"hephaestus.xml"
-				)
-			if(m==null)
-				throw new RuntimeException("Arm failed to assemble itself")
-			println "Connecting new device robot arm "+m
-			return m
-		})
+	//If the device does not exist, prompt for the connection
+
+	MobileBase m = MobileBaseLoader.fromGit(
+			"https://github.com/Halloween2020TheChild/GroguMechanicsCad.git",
+			"hephaestus.xml"
+			)
+	if(m==null)
+		throw new RuntimeException("Arm failed to assemble itself")
+	println "Connecting new device robot arm "+m
+	return m
+})
 println base
-ConfigurationDatabase.setObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
-List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", ["Dragon","X-Box","Game", "Switch"])
+ConfigurationDatabase.setObject("katapult", "gameControllerNames", [
+	"Dragon",
+	"X-Box",
+	"Game",
+	"Switch"
+])
+List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", [
+	"Dragon",
+	"X-Box",
+	"Game",
+	"Switch"
+])
 
 //Check if the device already exists in the device Manager
 BowlerJInputDevice g=DeviceManager.getSpecificDevice("gamepad",{
@@ -45,49 +60,49 @@ float trigAnalog=0;
 float tilt=0;
 
 IGameControlEvent listener = new IGameControlEvent() {
-	@Override public void onEvent(String name,float value) {
-		
-		if(name.contentEquals("l-joy-left-right")){
-			straif=value;
-		}
-		else if(name.contentEquals("r-joy-up-down")){
-			x=-value;
-		}
-		else if(name.contentEquals("l-joy-up-down")){
-			ljud=value;
-		}
-		else if(name.contentEquals("r-joy-left-right")){
-			rz=value;
-		}else if(name.contentEquals("analog-trig")){
-			trigAnalog=value/2.0+0.5;
-		}else if(name.contentEquals("z")){
-			trigButton=value/2.0+0.5;
-		}
-		else if(name.contentEquals("x-mode")){
-			if(value>0) {
-				
+			@Override public void onEvent(String name,float value) {
+
+				if(name.contentEquals("l-joy-left-right")){
+					straif=value;
+				}
+				else if(name.contentEquals("r-joy-up-down")){
+					x=-value;
+				}
+				else if(name.contentEquals("l-joy-up-down")){
+					ljud=value;
+				}
+				else if(name.contentEquals("r-joy-left-right")){
+					rz=value;
+				}else if(name.contentEquals("analog-trig")){
+					trigAnalog=value/2.0+0.5;
+				}else if(name.contentEquals("z")){
+					trigButton=value/2.0+0.5;
+				}
+				else if(name.contentEquals("x-mode")){
+					if(value>0) {
+
+					}
+				}else if(name.contentEquals("r-trig-button")){
+					if(value>0) {
+						tilt=1;
+					}else
+						tilt=0;
+				}
+				else if(name.contentEquals("l-trig-button")){
+					if(value>0) {
+						tilt=-1;
+					}else
+						tilt=0;
+				}
+				else if(name.contentEquals("y-mode")){
+					if(value>0) {
+
+					}
+				}
+				//System.out.println(name+" is value= "+value);
+
 			}
-		}else if(name.contentEquals("r-trig-button")){
-			if(value>0) {
-				tilt=1;	
-			}else
-				tilt=0;
 		}
-		else if(name.contentEquals("l-trig-button")){
-			if(value>0) {
-				tilt=-1;	
-			}else
-				tilt=0;
-		}
-		else if(name.contentEquals("y-mode")){
-			if(value>0) {
-				
-			}
-		}
-			//System.out.println(name+" is value= "+value);
-		
-	}
-}
 
 g.clearListeners()
 Log.enableSystemPrint(true)
@@ -113,20 +128,64 @@ def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
 		}
 	}
 }
+Thread meowThread = null
+def meow() {
+	
+	
+		def path = ScriptingEngine
+				.fileFromGit(
+				"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
+				"master",//branch
+				"cat-meow5.wav"// File from within the Git repo
+				)
+		try
+		{
+			AudioInputStream audioStream = AudioSystem.getAudioInputStream(path)
+			Clip audioClip = AudioSystem.getClip();
+			audioClip.open(audioStream);
+			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
+			//float gainValue = (((float) config.volume()) * 40f / 100f) - 35f;
+			//gainControl.setValue(gainValue);
+
+			audioClip.start();
+			ThreadUtil.wait(10);
+			try{
+				while(audioClip.isRunning()&& !Thread.interrupted()){
+					double pos =(double) audioClip.getMicrosecondPosition()/1000.0
+					double len =(double) audioClip.getMicrosecondLength()/1000.0
+					def percent = pos/len*100.0
+					System.out.println("Current "+pos +" Percent = "+percent);
+					ThreadUtil.wait(100);
+				}
+			}catch(Throwable t){
+				//BowlerStudio.printStackTrace(t)
+				t.printStackTrace(System.out)
+			}
+			audioClip.stop()
+		}
+		catch (Exception e)
+		{
+			e.printStackTrace(System.out)
+			//BowlerStudio.printStackTrace(e)
+			return null;
+		}
+	
+}
 try{
+	def lasttrig=0;
 	while(!Thread.interrupted() ){
 
 		TransformNR changed=new TransformNR()
 		changed.setX(170+(x*30))
 
-		
+
 		def headRnage=15
 		def analogy = -straif*70
 		def analogz = -ljud*35
 		changed.setZ(200+analogz)
 		changed.setY(analogy)
 		def analogup = -rz*headRnage *1.5
-		
+
 		changed.setRotation(new RotationNR(0,179.96+analogup,-50.79))
 		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90+tilt*-30))
 		changed=changed.times(tilted)
@@ -136,7 +195,7 @@ try{
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
 
 			fixVector(jointSpaceVect,arm)
-			
+
 			double bestsecs = arm.getBestTime(jointSpaceVect);
 			double normalsecs = ((double)msAttempted)/1000.0
 			def vect;
@@ -179,6 +238,21 @@ try{
 		//println head
 		DHParameterKinematics mouth=head.getAllDHChains().get(0)
 		//println mouth
+		if(trig>0 && lasttrig<0.1) {
+			if(meowThread==null||!meowThread.isAlive()) {
+				meowThread=new Thread() {
+					public void run() {
+						meow()
+						interrupt()
+						meowThread=null;
+					}
+				}
+				meowThread.start()
+			}
+				
+			
+		}
+		lasttrig=trig;
 		mouth.setDesiredJointAxisValue(0, trig, 0)
 		Thread.sleep(msActual)
 	}
