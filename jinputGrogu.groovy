@@ -271,3 +271,4 @@ try{
 }
 //remove listener and exit
 g.removeListeners(listener);
+((AudioInputStream)audioStream).close()
