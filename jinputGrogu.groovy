@@ -127,7 +127,7 @@ try{
 		changed.setY(analogy)
 		def analogup = -rz*headRnage *1.5
 		
-		changed.setRotation(new RotationNR(0,179.96+analogup,-57.79))
+		changed.setRotation(new RotationNR(0,179.96+analogup,-50.79))
 		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90+tilt*-30))
 		changed=changed.times(tilted)
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
@@ -143,14 +143,14 @@ try{
 			if(bestsecs>normalsecs) {
 				double percentpossible = normalsecs/bestsecs
 
-				TransformNR starttr=arm.getCurrentPoseTarget()
+				TransformNR starttr=arm.getCurrentTaskSpaceTransform()
 				TransformNR delta = starttr.inverse().times(changed);
 				TransformNR scaled = delta.scale(percentpossible)
 				TransformNR newTR= starttr.times(scaled)
 				vect = arm.inverseKinematics(arm.inverseOffset(newTR));
 				fixVector(vect,arm)
-
-				if(!arm.checkTaskSpaceTransform(newTR)) {
+				TransformNR finaltr= arm.forwardOffset( arm.forwardKinematics(vect))
+				if(!arm.checkTaskSpaceTransform(finaltr)) {
 					println "\n\npercentage "+percentpossible
 					println "Speed capped\t"+jointSpaceVect
 					println "to\t\t\t"+vect
@@ -160,7 +160,7 @@ try{
 					println "scaled"+scaled
 					println "newTR"+newTR
 					println "ERROR, cant get to "+newTR
-					
+					continue;
 				}
 			}else
 				vect = jointSpaceVect
