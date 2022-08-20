@@ -244,8 +244,8 @@ try{
 			if(meowThread==null||!meowThread.isAlive()) {
 				meowThread=new Thread() {
 					public void run() {
-						//meow()
 						println "MEOW"
+						meow()
 						interrupt()
 						meowThread=null;
 					}
@@ -255,7 +255,7 @@ try{
 				
 			
 		}
-		println trig
+		//println trig
 		lasttrig=trig;
 		mouth.setDesiredJointAxisValue(0, trig, 0)
 		Thread.sleep(msActual)
