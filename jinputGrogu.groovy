@@ -140,7 +140,7 @@ path = ScriptingEngine
 audioStream = AudioSystem.getAudioInputStream(path)
 clip = AudioSystem.getClip();
 clip.open(audioStream);
-gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+//gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 def meow() {
 	Clip audioClip = clip
 
@@ -271,4 +271,6 @@ try{
 }
 //remove listener and exit
 g.removeListeners(listener);
+Clip audioClip = clip
+audioClip.close()
 ((AudioInputStream)audioStream).close()
