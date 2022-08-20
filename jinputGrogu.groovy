@@ -137,7 +137,7 @@ def meow() {
 				.fileFromGit(
 				"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
 				"master",//branch
-				"cat-meow5.wav"// File from within the Git repo
+				"meow.wav"// File from within the Git repo
 				)
 		try
 		{
@@ -158,10 +158,12 @@ def meow() {
 					System.out.println("Current "+pos +" Percent = "+percent);
 					ThreadUtil.wait(100);
 				}
+				println "Done!"
 			}catch(Throwable t){
 				//BowlerStudio.printStackTrace(t)
 				t.printStackTrace(System.out)
 			}
+			println "stopping..."
 			audioClip.stop()
 		}
 		catch (Exception e)
@@ -170,9 +172,11 @@ def meow() {
 			//BowlerStudio.printStackTrace(e)
 			return null;
 		}
+		println "Returning"
 	
 }
-meow()
+//meow()
+println "Starting code"
 try{
 	def lasttrig=0;
 	while(!Thread.interrupted() ){
@@ -240,7 +244,7 @@ try{
 		//println head
 		DHParameterKinematics mouth=head.getAllDHChains().get(0)
 		//println mouth
-		if(trig>0 && lasttrig<0.1) {
+		if(trig>25 && lasttrig<40) {
 			if(meowThread==null||!meowThread.isAlive()) {
 				meowThread=new Thread() {
 					public void run() {
@@ -248,6 +252,7 @@ try{
 						meow()
 						interrupt()
 						meowThread=null;
+						println "Meow Thread Exit"
 					}
 				}
 				meowThread.start()
