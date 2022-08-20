@@ -129,25 +129,26 @@ def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
 	}
 }
 Thread meowThread = null
-
+	
+path = ScriptingEngine
+		.fileFromGit(
+		"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
+		"master",//branch
+		"meow.wav"// File from within the Git repo
+		)
+				
+audioStream = AudioSystem.getAudioInputStream(path)
+clip = AudioSystem.getClip();
+clip.open(audioStream);
+gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 def meow() {
-	
-	
-		def path = ScriptingEngine
-				.fileFromGit(
-				"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
-				"master",//branch
-				"meow.wav"// File from within the Git repo
-				)
+	Clip audioClip = clip
+
 		try
 		{
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(path)
-			Clip audioClip = AudioSystem.getClip();
-			audioClip.open(audioStream);
-			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
 			//float gainValue = (((float) config.volume()) * 40f / 100f) - 35f;
 			//gainControl.setValue(gainValue);
-
+			audioClip.setFramePosition(0);
 			audioClip.start();
 			ThreadUtil.wait(10);
 			try{
@@ -175,7 +176,7 @@ def meow() {
 		println "Returning"
 	
 }
-//meow()
+
 println "Starting code"
 try{
 	def lasttrig=0;
