@@ -17,6 +17,7 @@ import javax.sound.sampled.Clip
 import javax.sound.sampled.FloatControl
 
 ScriptingEngine.pull("https://github.com/Halloween2020TheChild/GroguMechanicsCad.git")
+ScriptingEngine.pull("https://github.com/madhephaestus/6dofServoArm.git")
 MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 	//If the device does not exist, prompt for the connection
 
