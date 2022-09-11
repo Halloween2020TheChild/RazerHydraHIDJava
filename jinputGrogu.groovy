@@ -30,12 +30,7 @@ MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 	return m
 })
 println base
-ConfigurationDatabase.setObject("katapult", "gameControllerNames", [
-	"Dragon",
-	"X-Box",
-	"Game",
-	"Switch"
-])
+
 List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", [
 	"Dragon",
 	"X-Box",
@@ -129,17 +124,16 @@ def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
 	}
 }
 Thread meowThread = null
-	
-path = ScriptingEngine
+				
+audioStream = AudioSystem.getAudioInputStream( ScriptingEngine
 		.fileFromGit(
 		"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
 		"master",//branch
 		"meow.wav"// File from within the Git repo
-		)
-				
-audioStream = AudioSystem.getAudioInputStream(path)
+		))
 clip = AudioSystem.getClip();
 clip.open(audioStream);
+
 //gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 def meow() {
 	Clip audioClip = clip
@@ -151,13 +145,14 @@ def meow() {
 			audioClip.setFramePosition(0);
 			audioClip.start();
 			ThreadUtil.wait(10);
+			double len =(double) audioClip.getMicrosecondLength()
 			try{
 				while(audioClip.isRunning()&& !Thread.interrupted()){
-					double pos =(double) audioClip.getMicrosecondPosition()/1000.0
-					double len =(double) audioClip.getMicrosecondLength()/1000.0
-					def percent = pos/len*100.0
-					System.out.println("Current "+pos +" Percent = "+percent);
-					ThreadUtil.wait(100);
+					double pos =(double) (audioClip.getMicrosecondPosition())
+					
+					def percent = len/pos
+					System.out.println("Current "+pos +" Percent = "+percent+" ");
+					ThreadUtil.wait(5);
 				}
 				println "Done!"
 			}catch(Throwable t){
