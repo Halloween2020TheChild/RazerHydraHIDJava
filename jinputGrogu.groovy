@@ -177,7 +177,7 @@ println "Starting code"
 try{
 	def lasttrig=0;
 	while(!Thread.interrupted() ){
-
+		Thread.sleep(msAttempted)
 		TransformNR changed=new TransformNR()
 		changed.setX(170+(x*30))
 
@@ -222,7 +222,6 @@ try{
 					println "scaled"+scaled
 					println "newTR"+newTR
 					println "ERROR, cant get to "+newTR
-					Thread.sleep(msAttempted)
 					continue;
 				}
 			}else
@@ -261,7 +260,7 @@ try{
 		//println trig
 		lasttrig=trig;
 		mouth.setDesiredJointAxisValue(0, trig, 0)
-		Thread.sleep(msAttempted)
+
 	}
 }catch(Throwable t){
 	t.printStackTrace(System.out)
