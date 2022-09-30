@@ -203,7 +203,7 @@ try{
 			double normalsecs = ((double)msAttempted)/1000.0
 			def vect;
 			if(bestsecs>normalsecs) {
-				double percentpossible = normalsecs/bestsecs
+				double percentpossible = normalsecs/bestsecs*2
 
 				TransformNR starttr=arm.getCurrentTaskSpaceTransform()
 				TransformNR delta = starttr.inverse().times(changed);
