@@ -182,7 +182,7 @@ try{
 		changed.setX(170+(x*30))
 
 
-		def headRnage=15
+		def headRnage=30
 		def analogy = -straif*70
 		def analogz = -ljud*35
 		changed.setZ(200+analogz)
