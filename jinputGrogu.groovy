@@ -213,16 +213,16 @@ try{
 				fixVector(vect,arm)
 				TransformNR finaltr= arm.forwardOffset( arm.forwardKinematics(vect))
 				if(!arm.checkTaskSpaceTransform(finaltr)) {
-					println "\n\npercentage "+percentpossible
-					println "Speed capped\t"+jointSpaceVect
-					println "to\t\t\t"+vect
-					println "changed"+changed
-					println "starttr"+starttr
-					println "delta"+delta
-					println "scaled"+scaled
-					println "newTR"+newTR
-					println "ERROR, cant get to "+newTR
-					continue;
+//					println "\n\npercentage "+percentpossible
+//					println "Speed capped\t"+jointSpaceVect
+//					println "to\t\t\t"+vect
+//					println "changed"+changed
+//					println "starttr"+starttr
+//					println "delta"+delta
+//					println "scaled"+scaled
+//					println "newTR"+newTR
+//					println "ERROR, cant get to "+newTR
+					//continue;
 				}
 			}else
 				vect = jointSpaceVect
