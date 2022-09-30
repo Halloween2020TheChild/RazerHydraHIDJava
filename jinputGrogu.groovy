@@ -16,8 +16,8 @@ import javax.sound.sampled.AudioSystem
 import javax.sound.sampled.Clip
 import javax.sound.sampled.FloatControl
 
-ScriptingEngine.pull("https://github.com/Halloween2020TheChild/GroguMechanicsCad.git")
-ScriptingEngine.pull("https://github.com/madhephaestus/6dofServoArm.git")
+//ScriptingEngine.pull("https://github.com/Halloween2020TheChild/GroguMechanicsCad.git")
+//ScriptingEngine.pull("https://github.com/madhephaestus/6dofServoArm.git")
 MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 	//If the device does not exist, prompt for the connection
 
@@ -222,6 +222,7 @@ try{
 					println "scaled"+scaled
 					println "newTR"+newTR
 					println "ERROR, cant get to "+newTR
+					Thread.sleep(msAttempted)
 					continue;
 				}
 			}else
@@ -260,7 +261,7 @@ try{
 		//println trig
 		lasttrig=trig;
 		mouth.setDesiredJointAxisValue(0, trig, 0)
-		Thread.sleep(msActual)
+		Thread.sleep(msAttempted)
 	}
 }catch(Throwable t){
 	t.printStackTrace(System.out)
