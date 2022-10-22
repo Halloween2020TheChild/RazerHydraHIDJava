@@ -54,10 +54,10 @@ float ljud =0;
 float trigButton=0;
 float trigAnalog=0;
 float tilt=0;
-
+long timeOfLastCommand = System.currentTimeMillis()
 IGameControlEvent listener = new IGameControlEvent() {
 			@Override public void onEvent(String name,float value) {
-
+				timeOfLastCommand = System.currentTimeMillis()
 				if(name.contentEquals("l-joy-left-right")){
 					straif=value;
 				}
@@ -262,6 +262,8 @@ try{
 		mouth.setDesiredJointAxisValue(0, trig, 0)
 
 	}
+}catch(java.lang.InterruptedException ex) {
+//exit sig	
 }catch(Throwable t){
 	t.printStackTrace(System.out)
 }
