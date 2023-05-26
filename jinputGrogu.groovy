@@ -259,7 +259,7 @@ try{
 		}
 		//println trig
 		lasttrig=trig;
-		println "Mouth ="+trig
+		//println "Mouth ="+trig
 		mouth.setDesiredJointAxisValue(0, trig, 0)
 
 	}
