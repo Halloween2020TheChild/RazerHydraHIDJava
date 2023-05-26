@@ -70,7 +70,7 @@ IGameControlEvent listener = new IGameControlEvent() {
 				else if(name.contentEquals("r-joy-left-right")){
 					rz=value;
 				}else if(name.contentEquals("analog-trig")){
-					trigAnalog=value/2.0+0.5;
+					trigAnalog=value;
 				}else if(name.contentEquals("z")){
 					trigButton=value/2.0+0.5;
 				}
@@ -193,7 +193,7 @@ try{
 		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90+tilt*-30))
 		changed=changed.times(tilted)
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		def trig=(trigAnalog*50)
+		def trig=(-trigAnalog*40)
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
 
@@ -259,6 +259,7 @@ try{
 		}
 		//println trig
 		lasttrig=trig;
+		println "Mouth ="+trig
 		mouth.setDesiredJointAxisValue(0, trig, 0)
 
 	}
