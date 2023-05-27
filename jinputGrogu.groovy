@@ -1,4 +1,5 @@
 
+import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
@@ -70,7 +71,7 @@ IGameControlEvent listener = new IGameControlEvent() {
 				else if(name.contentEquals("r-joy-left-right")){
 					rz=value;
 				}else if(name.contentEquals("analog-trig")){
-					trigAnalog=value;
+					trigAnalog=(value+1)/2;
 				}else if(name.contentEquals("z")){
 					trigButton=value/2.0+0.5;
 				}
@@ -194,7 +195,9 @@ try{
 		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90 ))
 		changed=changed.times(tilted).times(new TransformNR(0,0,0, new RotationNR(0,-tiltTarget,tiltTarget)))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		def trig=(-trigAnalog*40)
+		def trig=(trigAnalog*40)
+		if(trig>0)
+			trig=-trig
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
 
@@ -253,7 +256,7 @@ try{
 						println "Meow Thread Exit"
 					}
 				}
-				meowThread.start()
+				//meowThread.start()
 			}
 				
 			
@@ -261,7 +264,12 @@ try{
 		//println trig
 		lasttrig=trig;
 		//println "Mouth ="+trig
-		mouth.setDesiredJointAxisValue(0, trig, 0)
+		try {
+			mouth.setDesiredJointAxisValue(0, trig, 0)
+		}catch(Exception ex) {
+			//println "ERROR Mouth ="+trig+" "+ex.getLocalizedMessage()
+			//BowlerStudio.printStackTrace(ex)
+		}
 
 	}
 }catch(java.lang.InterruptedException ex) {
