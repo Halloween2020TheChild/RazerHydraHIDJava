@@ -248,7 +248,8 @@ try{
 		//println head
 		DHParameterKinematics mouth=head.getAllDHChains().get(0)
 		//println mouth
-		if(trig>-25 && lasttrig<-30) {
+		if(trig<-10 && lasttrig>-10) {
+			println "Mouthing"
 			if(meowThread==null||!meowThread.isAlive()) {
 				meowThread=new Thread() {
 					public void run() {
@@ -259,7 +260,7 @@ try{
 						println "Meow Thread Exit"
 					}
 				}
-				//meowThread.start()
+				meowThread.start()
 			}
 				
 			
