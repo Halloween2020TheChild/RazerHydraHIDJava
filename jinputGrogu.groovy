@@ -55,6 +55,7 @@ float ljud =0;
 float trigButton=0;
 float trigAnalog=0;
 float tilt=0;
+float trig=0
 long timeOfLastCommand = System.currentTimeMillis()
 IGameControlEvent listener = new IGameControlEvent() {
 			@Override public void onEvent(String name,float value) {
@@ -71,7 +72,9 @@ IGameControlEvent listener = new IGameControlEvent() {
 				else if(name.contentEquals("r-joy-left-right")){
 					rz=value;
 				}else if(name.contentEquals("analog-trig")){
-					trigAnalog=(value+1)/2;
+					trigAnalog=(value+1)/2-0.5;
+					trig=(trigAnalog*40)
+					println trig
 				}else if(name.contentEquals("z")){
 					trigButton=value/2.0+0.5;
 				}
@@ -195,7 +198,7 @@ try{
 		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90 ))
 		changed=changed.times(tilted).times(new TransformNR(0,0,0, new RotationNR(0,-tiltTarget,tiltTarget)))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		def trig=(trigAnalog*40)
+		
 		if(trig>0)
 			trig=-trig
 		try {
