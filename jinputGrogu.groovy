@@ -1,4 +1,5 @@
 
+import com.neuronrobotics.bowlerstudio.BowlerStudio
 import com.neuronrobotics.bowlerstudio.assets.ConfigurationDatabase
 import com.neuronrobotics.bowlerstudio.creature.MobileBaseLoader
 import com.neuronrobotics.bowlerstudio.scripting.ScriptingEngine
@@ -17,6 +18,7 @@ import javax.sound.sampled.Clip
 import javax.sound.sampled.FloatControl
 
 ScriptingEngine.pull("https://github.com/Halloween2020TheChild/GroguMechanicsCad.git")
+ScriptingEngine.pull("https://github.com/madhephaestus/6dofServoArm.git")
 MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 	//If the device does not exist, prompt for the connection
 
@@ -30,12 +32,7 @@ MobileBase base=DeviceManager.getSpecificDevice( "Standard6dof",{
 	return m
 })
 println base
-ConfigurationDatabase.setObject("katapult", "gameControllerNames", [
-	"Dragon",
-	"X-Box",
-	"Game",
-	"Switch"
-])
+
 List<String> gameControllerNames = ConfigurationDatabase.getObject("katapult", "gameControllerNames", [
 	"Dragon",
 	"X-Box",
@@ -58,10 +55,11 @@ float ljud =0;
 float trigButton=0;
 float trigAnalog=0;
 float tilt=0;
-
+float trig=0
+long timeOfLastCommand = System.currentTimeMillis()
 IGameControlEvent listener = new IGameControlEvent() {
 			@Override public void onEvent(String name,float value) {
-
+				timeOfLastCommand = System.currentTimeMillis()
 				if(name.contentEquals("l-joy-left-right")){
 					straif=value;
 				}
@@ -74,7 +72,9 @@ IGameControlEvent listener = new IGameControlEvent() {
 				else if(name.contentEquals("r-joy-left-right")){
 					rz=value;
 				}else if(name.contentEquals("analog-trig")){
-					trigAnalog=value/2.0+0.5;
+					trigAnalog=(value+1)/2-0.5;
+					trig=(trigAnalog*40)
+					println trig
 				}else if(name.contentEquals("z")){
 					trigButton=value/2.0+0.5;
 				}
@@ -129,34 +129,35 @@ def fixVector(double[] jointSpaceVect,DHParameterKinematics arm ) {
 	}
 }
 Thread meowThread = null
+				
+audioStream = AudioSystem.getAudioInputStream( ScriptingEngine
+		.fileFromGit(
+		"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
+		"master",//branch
+		"meow.wav"// File from within the Git repo
+		))
+clip = AudioSystem.getClip();
+clip.open(audioStream);
 
+//gainControl = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
 def meow() {
-	
-	
-		def path = ScriptingEngine
-				.fileFromGit(
-				"https://github.com/Halloween2020TheChild/RazerHydraHIDJava.git",//git repo URL
-				"master",//branch
-				"meow.wav"// File from within the Git repo
-				)
+	Clip audioClip = clip
+
 		try
 		{
-			AudioInputStream audioStream = AudioSystem.getAudioInputStream(path)
-			Clip audioClip = AudioSystem.getClip();
-			audioClip.open(audioStream);
-			FloatControl gainControl = (FloatControl) audioClip.getControl(FloatControl.Type.MASTER_GAIN);
 			//float gainValue = (((float) config.volume()) * 40f / 100f) - 35f;
 			//gainControl.setValue(gainValue);
-
+			audioClip.setFramePosition(0);
 			audioClip.start();
 			ThreadUtil.wait(10);
+			double len =(double) audioClip.getMicrosecondLength()
 			try{
 				while(audioClip.isRunning()&& !Thread.interrupted()){
-					double pos =(double) audioClip.getMicrosecondPosition()/1000.0
-					double len =(double) audioClip.getMicrosecondLength()/1000.0
-					def percent = pos/len*100.0
-					System.out.println("Current "+pos +" Percent = "+percent);
-					ThreadUtil.wait(100);
+					double pos =(double) (audioClip.getMicrosecondPosition())
+					
+					def percent = len/pos
+					System.out.println("Current "+pos +" Percent = "+percent+" ");
+					ThreadUtil.wait(5);
 				}
 				println "Done!"
 			}catch(Throwable t){
@@ -175,28 +176,31 @@ def meow() {
 		println "Returning"
 	
 }
-//meow()
+
 println "Starting code"
 try{
 	def lasttrig=0;
 	while(!Thread.interrupted() ){
-
+		Thread.sleep(msAttempted)
 		TransformNR changed=new TransformNR()
 		changed.setX(170+(x*30))
 
 
-		def headRnage=15
+		def headRnage=30
 		def analogy = -straif*70
 		def analogz = -ljud*35
 		changed.setZ(200+analogz)
 		changed.setY(analogy)
 		def analogup = -rz*headRnage *1.5
-
+		double tiltTarget = tilt*-15
 		changed.setRotation(new RotationNR(0,179.96+analogup,-50.79))
-		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90+tilt*-30))
-		changed=changed.times(tilted)
+		//TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90))
+		TransformNR tilted= new TransformNR(0,0,0, RotationNR.getRotationZ(-90 ))
+		changed=changed.times(tilted).times(new TransformNR(0,0,0, new RotationNR(0,-tiltTarget,tiltTarget)))
 		DHParameterKinematics arm = base.getAllDHChains().get(0)
-		def trig=(trigAnalog*50)
+		
+		if(trig>0)
+			trig=-trig
 		try {
 			double[] jointSpaceVect = arm.inverseKinematics(arm.inverseOffset(changed));
 
@@ -206,7 +210,7 @@ try{
 			double normalsecs = ((double)msAttempted)/1000.0
 			def vect;
 			if(bestsecs>normalsecs) {
-				double percentpossible = normalsecs/bestsecs
+				double percentpossible = normalsecs/bestsecs*2
 
 				TransformNR starttr=arm.getCurrentTaskSpaceTransform()
 				TransformNR delta = starttr.inverse().times(changed);
@@ -216,16 +220,16 @@ try{
 				fixVector(vect,arm)
 				TransformNR finaltr= arm.forwardOffset( arm.forwardKinematics(vect))
 				if(!arm.checkTaskSpaceTransform(finaltr)) {
-					println "\n\npercentage "+percentpossible
-					println "Speed capped\t"+jointSpaceVect
-					println "to\t\t\t"+vect
-					println "changed"+changed
-					println "starttr"+starttr
-					println "delta"+delta
-					println "scaled"+scaled
-					println "newTR"+newTR
-					println "ERROR, cant get to "+newTR
-					continue;
+//					println "\n\npercentage "+percentpossible
+//					println "Speed capped\t"+jointSpaceVect
+//					println "to\t\t\t"+vect
+//					println "changed"+changed
+//					println "starttr"+starttr
+//					println "delta"+delta
+//					println "scaled"+scaled
+//					println "newTR"+newTR
+//					println "ERROR, cant get to "+newTR
+					//continue;
 				}
 			}else
 				vect = jointSpaceVect
@@ -244,7 +248,8 @@ try{
 		//println head
 		DHParameterKinematics mouth=head.getAllDHChains().get(0)
 		//println mouth
-		if(trig>25 && lasttrig<40) {
+		if(trig<-10 && lasttrig>-10) {
+			println "Mouthing"
 			if(meowThread==null||!meowThread.isAlive()) {
 				meowThread=new Thread() {
 					public void run() {
@@ -257,16 +262,25 @@ try{
 				}
 				meowThread.start()
 			}
-				
-			
 		}
 		//println trig
 		lasttrig=trig;
-		mouth.setDesiredJointAxisValue(0, trig, 0)
-		Thread.sleep(msActual)
+		//println "Mouth ="+trig
+		try {
+			mouth.setDesiredJointAxisValue(0, trig, 0)
+		}catch(Exception ex) {
+			//println "ERROR Mouth ="+trig+" "+ex.getLocalizedMessage()
+			//BowlerStudio.printStackTrace(ex)
+		}
+
 	}
+}catch(java.lang.InterruptedException ex) {
+//exit sig	
 }catch(Throwable t){
 	t.printStackTrace(System.out)
 }
 //remove listener and exit
 g.removeListeners(listener);
+Clip audioClip = clip
+audioClip.close()
+((AudioInputStream)audioStream).close()
