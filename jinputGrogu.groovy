@@ -260,7 +260,7 @@ try{
 						println "Meow Thread Exit"
 					}
 				}
-				meowThread.start()
+				//meowThread.start()
 			}
 				
 			
