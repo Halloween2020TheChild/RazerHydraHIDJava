@@ -262,8 +262,6 @@ try{
 				}
 				//meowThread.start()
 			}
-				
-			
 		}
 		//println trig
 		lasttrig=trig;
